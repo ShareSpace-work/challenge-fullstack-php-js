@@ -1,0 +1,22 @@
+:80 {
+        root * "/var/www/html/webroot"
+        file_server
+        encode gzip
+		request_body {
+			max_size 1GB
+		}
+        php_fastcgi backend:9000
+}
+:80/en/dashboard*,
+:80/pl/dashboard*,
+:80/de/dashboard*,
+:80/hu/dashboard*,
+:80/en/agreement*,
+:80/pl/agreement*,
+:80/de/agreement*,
+:80/hu/agreement*,
+:80/api/download*,
+:80/dashboard-static*,
+:80/_next* {
+        reverse_proxy host.docker.internal:4000
+}

@@ -1,0 +1,49 @@
+version: '3.7'
+# Services
+services:
+  # Nginx Service
+  caddy:
+    image: caddy:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    volumes:
+      - ./.docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./src:/var/www/html:ro,delegated
+    networks:
+      - dev_network
+  # Backend Service
+  backend:
+    build: ./.docker/backend
+    working_dir: /var/www/html
+    volumes:
+      - ./src:/var/www/html:delegated
+    networks:
+      - dev_network
+  # MySQL Service
+  mysql:
+    image: mysql:8.0.23
+    platform: linux/x86_64
+    volumes:
+      - mysql-volume:/var/lib/mysql
+    environment:
+      TZ: "Europe/Warsaw"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_USER: 'sharespace'
+      MYSQL_PASSWORD: 'sharespace'
+      MYSQL_DATABASE: 'sharespace'
+    ports:
+      - 8083:3306
+    command: --sql_mode=""
+    networks:
+      - dev_network
+#Docker Networks
+networks:
+  dev_network:
+    driver: bridge
+# Volumes
+volumes:
+  mysql-volume:
